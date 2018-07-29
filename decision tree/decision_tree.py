@@ -48,27 +48,32 @@ with open('watermelon.txt','r') as file:
                     data[i]=float(data[i])
             wmData.append(data[1:9])
             classify.append(data[9])
-#建立模型
-wmData=np.mat(wmData)
-classify=np.array(classify).reshape(17,1)
-w=np.mat([1,1,1,1,1,1,1,1],dtype=float)
-yhat = 1/(1+np.exp(-np.dot(wmData,w.T)))
-loss = classify-yhat
-#使用梯度下降
-i=0
-#python和C++一样，在或关系中，一旦检测到前条件成立，后条件就不会检测
-while(i<1):
-    w+=learningrate*np.dot(loss.T,wmData)
-    yhat = 1 / (1 + np.exp(-np.dot(wmData, w.T)))
-    loss = classify - yhat
-    i+=1
-print(w)
-print(loss)
-for item in yhat:
-    if item>0.5:
-        print("1")
+#定义计算信息增益（即互信息）的函数
+def calculate(mData,classify,feature,Ent,isseries):
+    if isseries==True:
+        print("连续特征")
     else:
-        print("0")
+        num_type=len(transfer[feature])
+        count = len(wmData)
+        totalEnt = 0
+        for j in transfer[feature]:
+            i = 0
+            first=0
+            second=0
+            EntDv=0
+            for index,data in enumerate(mData):
+                if data[feature]==transfer[feature][j]:
+                    i+=1
+                    if classify[index]==0:
+                        second+=1
+                    else:
+                        first+=1
+            EntDv=-((first/i)*np.log2(first/i)+(second/i)*np.log2(second/i))
+            rate = i/count
+            totalEnt+=rate*EntDv
+        Gain = Ent-totalEnt
+        print(Gain)
 
 
 
+calculate(wmData,classify,0,0.998,False)
